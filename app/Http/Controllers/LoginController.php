@@ -7,14 +7,18 @@ use Illuminate\Support\Facades\Auth;
 
 class LoginController extends Controller
 {
-    protected function authenticated(Request $request, $user)
+    public function authenticated(Request $request, $user)
     {
+        // Redirect berdasarkan role user
         if ($user->isAdmin()) {
-            return redirect()->route('dashboard.admin');
-        } elseif ($user->isKasir()) {
-            return redirect()->route('dashboard.kasir');
+            return redirect('/dashboard');
         }
 
-        return redirect()->route('dashboard');
+        if ($user->isKasir()) {
+            return redirect('/dashboard');
+        }
+
+        // Redirect default
+        return redirect('/');
     }
 }
