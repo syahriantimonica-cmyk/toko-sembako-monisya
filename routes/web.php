@@ -14,29 +14,30 @@ use App\Http\Controllers\DashboardController;
 |--------------------------------------------------------------------------
 */
 
-// Redirect awal ke login
+// =====================
+// REDIRECT AWAL
+// =====================
+
 Route::get('/', function () {
     return redirect('/login');
 });
+
 
 // =====================
 // DASHBOARD
 // =====================
 
-// Dashboard admin
-Route::get('/dashboard/admin', function () {
-    return 'Dashboard Admin Berhasil';
-})->middleware(['auth'])->name('dashboard.admin');
+Route::middleware(['auth'])->group(function () {
 
-// Dashboard kasir
-Route::get('/dashboard/kasir', function () {
-    return 'Dashboard Kasir Berhasil';
-})->middleware(['auth'])->name('dashboard.kasir');
+    Route::get('/dashboard/admin', [DashboardController::class, 'admin'])
+        ->name('dashboard.admin');
 
-// Dashboard umum
-Route::get('/dashboard', function () {
-    return 'Dashboard Berhasil Login';
-})->middleware(['auth'])->name('dashboard');
+    Route::get('/dashboard/kasir', [DashboardController::class, 'kasir'])
+        ->name('dashboard.kasir');
+
+    Route::get('/dashboard', [DashboardController::class, 'index'])
+        ->name('dashboard');
+});
 
 
 // =====================
@@ -46,7 +47,6 @@ Route::get('/dashboard', function () {
 Route::middleware(['auth'])->group(function () {
 
     Route::resource('products', ProductController::class);
-
 });
 
 
@@ -56,10 +56,11 @@ Route::middleware(['auth'])->group(function () {
 
 Route::middleware(['auth'])->group(function () {
 
-    Route::get('/stok', [StockController::class, 'index'])->name('stok.index');
+    Route::get('/stok', [StockController::class, 'index'])
+        ->name('stok.index');
 
-    Route::patch('/stok/{product}', [StockController::class, 'update'])->name('stok.update');
-
+    Route::patch('/stok/{product}', [StockController::class, 'update'])
+        ->name('stok.update');
 });
 
 
@@ -69,22 +70,29 @@ Route::middleware(['auth'])->group(function () {
 
 Route::middleware(['auth'])->group(function () {
 
-    Route::get('/transaksi', [TransactionController::class, 'index'])->name('transaksi.index');
+    Route::get('/transaksi', [TransactionController::class, 'index'])
+        ->name('transaksi.index');
 
-    Route::post('/transaksi/add-cart', [TransactionController::class, 'addCart'])->name('transaksi.addCart');
+    Route::post('/transaksi/add-cart', [TransactionController::class, 'addCart'])
+        ->name('transaksi.addCart');
 
-    Route::post('/transaksi/update-cart', [TransactionController::class, 'updateCart'])->name('transaksi.updateCart');
+    Route::post('/transaksi/update-cart', [TransactionController::class, 'updateCart'])
+        ->name('transaksi.updateCart');
 
-    Route::post('/transaksi/remove-cart', [TransactionController::class, 'removeCart'])->name('transaksi.removeCart');
+    Route::post('/transaksi/remove-cart', [TransactionController::class, 'removeCart'])
+        ->name('transaksi.removeCart');
 
-    Route::post('/transaksi/checkout', [TransactionController::class, 'checkout'])->name('transaksi.checkout');
+    Route::post('/transaksi/checkout', [TransactionController::class, 'checkout'])
+        ->name('transaksi.checkout');
 
-    Route::get('/transaksi/riwayat', [TransactionController::class, 'history'])->name('transaksi.history');
+    Route::get('/transaksi/riwayat', [TransactionController::class, 'history'])
+        ->name('transaksi.history');
 
-    Route::get('/transaksi/{transaction}', [TransactionController::class, 'show'])->name('transaksi.show');
+    Route::get('/transaksi/{transaction}', [TransactionController::class, 'show'])
+        ->name('transaksi.show');
 
-    Route::delete('/transaksi/{transaction}', [TransactionController::class, 'destroy'])->name('transaksi.destroy');
-
+    Route::delete('/transaksi/{transaction}', [TransactionController::class, 'destroy'])
+        ->name('transaksi.destroy');
 });
 
 
@@ -94,16 +102,46 @@ Route::middleware(['auth'])->group(function () {
 
 Route::middleware(['auth'])->group(function () {
 
-    Route::get('/laporan', [LaporanController::class, 'index'])->name('laporan.index');
+    // Export PDF Semua
+    Route::get(
+        '/laporan/export/pdf',
+        [LaporanController::class, 'exportPdf']
+    )->name('laporan.exportPdf');
 
-    Route::get('/laporan/{id}', [LaporanController::class, 'detail'])->name('laporan.detail');
 
-    Route::get('/laporan/export/pdf', [LaporanController::class, 'exportPdf'])->name('laporan.exportPdf');
+    // Export PDF Detail
+    Route::get(
+        '/laporan/{id}/export/pdf',
+        [LaporanController::class, 'exportDetailPdf']
+    )->name('laporan.exportDetailPdf');
 
-    Route::get('/laporan/{id}/export/pdf', [LaporanController::class, 'exportDetailPdf'])->name('laporan.exportDetailPdf');
 
-    Route::delete('/laporan/{id}', [LaporanController::class, 'destroy'])->name('laporan.destroy');
+    // Hapus Semua Kecuali Admin
+    Route::delete(
+        '/laporan/clear/all',
+        [LaporanController::class, 'clearAllExceptAdmin']
+    )->name('laporan.clearAllExceptAdmin');
 
+
+    // Halaman Laporan
+    Route::get(
+        '/laporan',
+        [LaporanController::class, 'index']
+    )->name('laporan.index');
+
+
+    // Detail Laporan
+    Route::get(
+        '/laporan/{id}',
+        [LaporanController::class, 'detail']
+    )->name('laporan.detail');
+
+
+    // Hapus Transaksi
+    Route::delete(
+        '/laporan/{id}',
+        [LaporanController::class, 'destroy']
+    )->name('laporan.destroy');
 });
 
 
@@ -113,14 +151,17 @@ Route::middleware(['auth'])->group(function () {
 
 Route::middleware(['auth'])->group(function () {
 
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::get('/profile', [ProfileController::class, 'edit'])
+        ->name('profile.edit');
 
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::patch('/profile', [ProfileController::class, 'update'])
+        ->name('profile.update');
 
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])
+        ->name('profile.destroy');
 
-    Route::delete('/profile/photo', [ProfileController::class, 'deletePhoto'])->name('profile.deletePhoto');
-
+    Route::delete('/profile/photo', [ProfileController::class, 'deletePhoto'])
+        ->name('profile.deletePhoto');
 });
 
 
